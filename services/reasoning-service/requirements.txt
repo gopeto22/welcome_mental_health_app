@@ -1,0 +1,12 @@
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.9.2
+pydantic-settings==2.6.0
+python-dotenv==1.0.1
+
+# Phase A - API LLM
+groq==0.11.0
+
+# Phase B - Local models (optional, for future)
+# llama-cpp-python==0.2.20
+# mlc-llm==0.1.0

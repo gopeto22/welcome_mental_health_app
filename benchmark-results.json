@@ -1,0 +1,48 @@
+{
+  "timestamp": 1760454174.421312,
+  "session_id": "bench_1760454174",
+  "summary": {
+    "stt_latency_ms": {
+      "mean": 0,
+      "median": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "reasoning_latency_ms": {
+      "mean": 0,
+      "median": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "tts_latency_ms": {
+      "mean": 0,
+      "median": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "e2e_latency_ms": {
+      "mean": 0,
+      "median": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "stt_tokens_per_sec": {
+      "mean": 0,
+      "median": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "reasoning_tokens_per_sec": {
+      "mean": 0,
+      "median": 0,
+      "p95": 0,
+      "p99": 0
+    }
+  },
+  "raw_results": {
+    "stt_latencies": [],
+    "reasoning_latencies": [],
+    "tts_latencies": [],
+    "e2e_latencies": []
+  }
+}

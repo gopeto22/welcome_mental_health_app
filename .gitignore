@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# FastAPI / Uvicorn
+*.log
+logs/
+*.pid
+
+# Audio files (don't commit cached audio)
+services/speech-service/audio_cache/
+services/media-service/audio_chunks/
+
+# Risk logs (contains session data)
+services/reasoning-service/risk-log.jsonl
+
+# Environment variables (NEVER commit secrets)
+.env
+*.env
+!.env.example
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+.DS_Store
+bun.lockb
+package-lock.json
+
+# IDE
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Google Cloud credentials (NEVER commit)
+*credentials.json
+*-credentials.json
+service-account*.json

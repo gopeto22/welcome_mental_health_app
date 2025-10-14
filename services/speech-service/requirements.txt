@@ -1,0 +1,19 @@
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+python-multipart==0.0.12
+aiofiles==24.1.0
+httpx==0.27.2
+pydantic==2.9.2
+pydantic-settings==2.6.0
+python-dotenv==1.0.1
+
+# Phase A - API providers
+groq==0.11.0
+google-cloud-texttospeech==2.17.2
+
+# Audio processing
+pydub==0.25.1
+
+# Phase B - Local models (optional, for future)
+# openai-whisper==20231117
+# torch==2.1.0
