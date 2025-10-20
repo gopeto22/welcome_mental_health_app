@@ -35,9 +35,17 @@ class GoogleTTSProvider(TTSProvider):
         
         # Voice configuration
         # Tamil (India) voices: ta-IN-Standard-A (female), ta-IN-Standard-B (male)
+        # ta-IN-Wavenet-A, ta-IN-Wavenet-B (premium voices)
+        
+        # If voice is just language code (ta-IN), use default Standard-A
+        if voice == "ta-IN":
+            voice_name = "ta-IN-Standard-A"
+        else:
+            voice_name = voice  # Use the full voice name as provided
+        
         voice_params = texttospeech.VoiceSelectionParams(
-            language_code=voice,
-            name=f"{voice}-Standard-A",  # Default to Standard-A (female)
+            language_code="ta-IN",
+            name=voice_name,
             ssml_gender=texttospeech.SsmlVoiceGender.FEMALE
         )
         

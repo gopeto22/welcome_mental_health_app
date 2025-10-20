@@ -1,6 +1,6 @@
 # One-Off E2E Voice Demo Results
 
-**Date:** 2025-10-20 15:20:19
+**Date:** 2025-10-20 15:49:59
 **Model:** Groq Llama-3.3-70B
 **Locale:** ta-IN
 **Total Turns:** 3
@@ -10,24 +10,24 @@
 
 | Turn | STT (ms) | LLM (ms) | TTS (ms) | E2E (ms) |
 |------|----------|----------|----------|----------|
-| 1 | 0 | 714 | 0 | 887 |
-| 2 | 0 | 821 | 0 | 1,120 |
-| 3 | 0 | 939 | 0 | 1,124 |
+| 1 | 450 | 779 | 830 | 2,143 |
+| 2 | 281 | 856 | 612 | 1,835 |
+| 3 | 324 | 716 | 827 | 1,951 |
 
 **Averages:**
-- STT: 0ms
-- LLM: 825ms
-- TTS: 0ms
-- E2E: 1044ms (1.04s)
+- STT: 352ms
+- LLM: 784ms
+- TTS: 756ms
+- E2E: 1976ms (1.98s)
 
 ## Interpretation
 
-All turns completed with E2E latency of **1.04s average**, well within Phase A target of <10s. 
+All turns completed with E2E latency of **1.98s average**, well within Phase A target of <10s. 
 
 **Latency breakdown:**
-- LLM reasoning: ~79% of E2E time
-- TTS synthesis: ~0% of E2E time
-- STT transcription: ~0% of E2E time
+- LLM reasoning: ~40% of E2E time
+- TTS synthesis: ~38% of E2E time
+- STT transcription: ~18% of E2E time
 
 **Cost validation:** $0.150 total (<$1 target ✅)
 

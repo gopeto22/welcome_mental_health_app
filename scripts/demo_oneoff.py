@@ -74,6 +74,10 @@ def synthesize_user_audio(text_ta: str, turn: int) -> Path:
         if not file_url:
             print(f"    ⚠️  No file_url returned, skipping audio save")
             return None
+        
+        # Handle relative URLs - prepend base URL if needed
+        if file_url.startswith("/"):
+            file_url = f"{SPEECH_BASE}{file_url}"
             
         # Download from speech service
         audio_resp = httpx.get(file_url, timeout=10.0)
@@ -176,6 +180,10 @@ def synthesize_reply_audio(reply_text: str, turn: int) -> tuple[Path, int]:
         if not file_url:
             print(f"    ⚠️  No file_url returned, skipping audio save")
             return None, elapsed_ms
+        
+        # Handle relative URLs - prepend base URL if needed
+        if file_url.startswith("/"):
+            file_url = f"{SPEECH_BASE}{file_url}"
             
         audio_resp = httpx.get(file_url, timeout=10.0)
         audio_resp.raise_for_status()

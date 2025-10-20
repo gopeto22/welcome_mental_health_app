@@ -38,6 +38,9 @@ services/reasoning-service/risk-log.jsonl
 # Environment variables (NEVER commit secrets)
 .env
 *.env
+
+# Google Cloud credentials (NEVER commit)
+.config/*.json
 !.env.example
 
 # Node / Frontend
