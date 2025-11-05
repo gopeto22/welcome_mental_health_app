@@ -5,8 +5,8 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to demo page
-    navigate("/demo");
+    // Redirect to mobile app (MVP)
+    navigate("/mobile");
   }, [navigate]);
 
   return null;

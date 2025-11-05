@@ -1,0 +1,84 @@
+{
+  "header": {
+    "title": "AI Therapy Assistant",
+    "subtitle": "For Treatment of PTSD",
+    "transcript": "Transcript",
+    "exercises": "Exercises"
+  },
+  "banner": {
+    "demo": "This tool supports you between sessions. In an emergency call 044-46464646."
+  },
+  "suds": {
+    "title": "How distressed are you right now?",
+    "notAtAll": "Not at all",
+    "completely": "Completely",
+    "postTitle": "How are you feeling now?"
+  },
+  "cta": {
+    "start": "Let's Start",
+    "stop": "I'm ready to stop",
+    "repeat": "Let me try that again",
+    "tryOther": "Try another exercise"
+  },
+  "composer": {
+    "placeholder": "Tell me what's on your mind...",
+    "send": "Send"
+  },
+  "mic": {
+    "start": "Start recording",
+    "hold": "Hold to record",
+    "release": "Release to send",
+    "recording": "Recording",
+    "listening": "Listening..."
+  },
+  "exercises": {
+    "title": "Choose a grounding exercise:",
+    "general": {
+      "name": "General Grounding",
+      "duration": "4-5 minutes",
+      "emoji": "🧘"
+    },
+    "breathing": {
+      "name": "Paced Breathing",
+      "duration": "4-5 minutes",
+      "emoji": "🫁"
+    },
+    "countdown": {
+      "name": "Countdown",
+      "duration": "3-4 minutes",
+      "emoji": "🔢"
+    }
+  },
+  "safety": {
+    "title": "Safety Support",
+    "intro": "I notice you're experiencing a high level of distress right now.",
+    "message": "Your safety and wellbeing are most important. Would you like to:",
+    "callSupport": "Call support right now",
+    "tryGrounding": "Try a grounding exercise",
+    "returnChat": "Or, if you prefer, return to chat"
+  },
+  "postExercise": {
+    "title": "How are you feeling now?",
+    "stop": "I'm ready to stop",
+    "repeat": "Let me try that again",
+    "tryAnother": "Try a different exercise"
+  },
+  "voiceStage": {
+    "idle": "How can I support you today?",
+    "listening": "Listening...",
+    "thinking": "Thinking...",
+    "speaking": "Speaking..."
+  },
+  "transcript": {
+    "title": "Transcript",
+    "clear": "Clear",
+    "user": "You",
+    "assistant": "Assistant",
+    "empty": "No messages yet"
+  },
+  "locale": {
+    "en": "English",
+    "ta": "தமிழ்",
+    "switchTo": "Switch to"
+  }
+}

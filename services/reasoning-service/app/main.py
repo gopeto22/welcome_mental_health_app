@@ -15,6 +15,7 @@ env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(env_path)
 from .reasoner import Reasoner, get_reasoner
 from .safety import SafetyGuardrails
+from .safety_router import CrisisRouter
 
 # Configure logging
 logging.basicConfig(
@@ -25,10 +26,15 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Reasoning Service", version="1.0.0")
 
-# CORS
+# CORS - allow frontend on multiple ports for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:8001"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:8001",
+        "http://localhost:8081",
+        "http://localhost:8082",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,25 +47,61 @@ RISK_LOG_PATH.touch(exist_ok=True)
 # Initialize providers
 reasoner: Optional[Reasoner] = None
 safety: Optional[SafetyGuardrails] = None
+crisis_router: Optional[CrisisRouter] = None
 
 
 @app.on_event("startup")
 async def startup():
-    global reasoner, safety
+    global reasoner, safety, crisis_router
     reasoner = get_reasoner()
     safety = SafetyGuardrails()
+    crisis_router = CrisisRouter()
     logger.info(f"Reasoning service started with reasoner={type(reasoner).__name__}")
 
 
 @app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "ok",
-        "service": "reasoning-service",
-        "reasoner": os.getenv("REASONER", "server"),
-        "timestamp": datetime.utcnow().isoformat() + "Z"
+def health_check():
+    return {"status": "ok", "service": "reasoning"}
+
+
+@app.post("/events/session")
+async def log_session_metrics(data: dict):
+    """
+    Log session-level metrics including SUDS improvement.
+    
+    Expected payload:
+    {
+        "session_id": "abc123",
+        "suds_start": 7,
+        "suds_end": 3,
+        "message_count": 8,
+        "duration_seconds": 240,
+        "timestamp": "2025-01-15T10:30:00Z"
     }
+    """
+    import json
+    from pathlib import Path
+    from datetime import datetime
+    
+    # Calculate SUDS delta
+    suds_delta = data.get("suds_start", 0) - data.get("suds_end", 0)
+    
+    # Enrich log entry
+    log_entry = {
+        **data,
+        "suds_delta": suds_delta,
+        "improvement": suds_delta > 0,
+        "logged_at": datetime.utcnow().isoformat(),
+    }
+    
+    # Append to session log
+    log_file = Path("session-log.jsonl")
+    with open(log_file, "a") as f:
+        f.write(json.dumps(log_entry) + "\n")
+    
+    logger.info(f"Session metrics logged: {data['session_id']} (SUDS Δ: {suds_delta})")
+    
+    return {"status": "logged", "suds_delta": suds_delta}
 
 
 class RiskFlags(BaseModel):
@@ -88,7 +130,7 @@ async def generate_response(request: RespondRequest):
     start_time = datetime.utcnow()
     
     try:
-        if not reasoner or not safety:
+        if not reasoner or not safety or not crisis_router:
             raise HTTPException(status_code=503, detail="Service not initialized")
         
         # Combine transcript window
@@ -96,27 +138,29 @@ async def generate_response(request: RespondRequest):
         
         logger.info(f"Processing request for session {request.session_id}, input length: {len(user_input)}")
         
-        # Pre-check: Crisis detection
-        pre_check = safety.pre_check(user_input)
+        # Use crisis router for immediate crisis detection
+        crisis_response, crisis_flags_dict = crisis_router.route_response(user_input, request.locale)
         
-        if pre_check["is_high_risk"]:
+        if crisis_response:
+            # Crisis detected - use template immediately
             # Log risk event
             await log_risk_event({
                 "session_id": request.session_id,
-                "event_type": "high_risk_detected",
-                "keywords": pre_check["keywords"],
+                "event_type": "crisis_detected",
+                "keywords": ["crisis_keyword_match"],
                 "transcript_snippet": user_input[:200],
                 "timestamp": datetime.utcnow().isoformat() + "Z"
             })
             
             # Return crisis template
-            reply_text = safety.get_crisis_template(request.locale)
+            reply_text = crisis_response
             risk_flags = RiskFlags(
-                has_self_harm=pre_check.get("self_harm", False),
-                needs_escalation=True
+                has_self_harm=crisis_flags_dict.get("has_self_harm", False),
+                has_medical_advice=crisis_flags_dict.get("has_medical_advice", False),
+                needs_escalation=crisis_flags_dict.get("needs_escalation", True)
             )
         else:
-            # Generate LLM response
+            # No crisis - generate LLM response
             reply_text = await reasoner.generate(
                 user_input=user_input,
                 conversation_history=request.transcript_window,
@@ -132,9 +176,9 @@ async def generate_response(request: RespondRequest):
                 reply_text = safety.get_supportive_template(request.locale)
             
             risk_flags = RiskFlags(
-                has_self_harm=pre_check.get("self_harm", False),
+                has_self_harm=crisis_flags_dict.get("has_self_harm", False),
                 has_medical_advice=post_check.get("has_medical_advice", False),
-                needs_escalation=pre_check.get("needs_escalation", False)
+                needs_escalation=crisis_flags_dict.get("needs_escalation", False)
             )
         
         elapsed = (datetime.utcnow() - start_time).total_seconds()

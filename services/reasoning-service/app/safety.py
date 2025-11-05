@@ -141,19 +141,22 @@ class SafetyGuardrails:
 
 நீங்கள் தனியாக இல்லை. தொழில்முறை உதவி உங்களுக்குக் கிடைக்கும்."""
         else:
-            return """Your safety is very important. Please seek immediate help.
+            return """I'm really concerned about what you've just shared with me. Your safety is the most important thing right now.
 
-**Tamil Nadu Mental Health Helpline**: 044-46464646
-**National Crisis Helpline**: 9152987821
+Please reach out for immediate support:
+📞 Tamil Nadu Mental Health Helpline: 044-46464646
+📞 National Crisis Helpline: 9152987821
 
-You are not alone. Professional help is available."""
+These are trained counselors available 24/7 who can help you right now.
+
+You're not alone in this. There are people who care and want to support you."""
     
     def get_supportive_template(self, locale: str = "ta-IN") -> str:
         """Return generic supportive template (fallback for unsafe LLM responses)"""
         if locale == "ta-IN":
             return """உங்கள் உணர்வுகளைப் பகிர்ந்ததற்கு நன்றி. நீங்கள் சரியான பாதையில் இருக்கிறீர்கள். தொழில்முறை ஆலோசகரிடம் பேசுவது உதவியாக இருக்கும்."""
         else:
-            return """Thank you for sharing your feelings. You're taking the right step. Speaking with a professional counselor may be helpful."""
+            return """I hear you. Thank you for sharing this with me. You're taking a brave step by reaching out. Speaking with a professional counselor can really help. How are you feeling right now?"""
     
     def get_grounding_prompts(self, locale: str = "ta-IN") -> List[str]:
         """Return list of grounding prompts (for future use)"""

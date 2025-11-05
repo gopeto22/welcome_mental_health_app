@@ -58,7 +58,7 @@ export async function uploadAudioChunk(
 // Reasoning Service: Generate safe response
 export async function generateResponse(
   sessionId: string,
-  userInput: string,
+  transcriptWindow: string[],
   locale: string = "ta-IN"
 ): Promise<ReasoningResponse> {
   const response = await fetch(`${REASONING_SERVICE_URL}/respond`, {
@@ -68,7 +68,7 @@ export async function generateResponse(
     },
     body: JSON.stringify({
       session_id: sessionId,
-      user_input: userInput,
+      transcript_window: transcriptWindow,
       locale,
     }),
   });
@@ -78,13 +78,25 @@ export async function generateResponse(
     throw new Error(error.detail || "Failed to generate response");
   }
 
-  return response.json();
+  const data = await response.json();
+  
+  // Map reply_text to response for consistency
+  return {
+    response: data.reply_text,
+    riskFlags: {
+      hasSelfHarm: data.risk_flags.has_self_harm,
+      hasMedicalAdvice: data.risk_flags.has_medical_advice,
+      needsEscalation: data.risk_flags.needs_escalation,
+    },
+    usedTemplate: false,
+    timing_ms: data.processing_time_ms,
+  };
 }
 
 // Speech Service: Text-to-Speech
 export async function textToSpeech(
   text: string,
-  locale: string = "ta-IN"
+  voice: string = "ta-IN-Standard-A"
 ): Promise<TTSResponse> {
   const response = await fetch(`${SPEECH_SERVICE_URL}/tts/speak`, {
     method: "POST",
@@ -93,7 +105,7 @@ export async function textToSpeech(
     },
     body: JSON.stringify({
       text,
-      locale,
+      voice,
     }),
   });
 
@@ -104,10 +116,12 @@ export async function textToSpeech(
 
   const data = await response.json();
   
-  // Construct full audio URL
+  // Construct full audio URL from relative path
   return {
-    ...data,
-    audioUrl: `${SPEECH_SERVICE_URL}${data.audioUrl}`,
+    audioId: data.file_url,
+    audioUrl: `${SPEECH_SERVICE_URL}${data.file_url}`,
+    cached: data.cached,
+    timing_ms: data.duration_ms,
   };
 }
 
@@ -118,20 +132,62 @@ export async function checkAllServicesHealth(): Promise<{
   reasoning: boolean;
   allHealthy: boolean;
 }> {
-  const results = await Promise.allSettled([
-    fetch(`${MEDIA_SERVICE_URL}/health`).then(r => r.ok),
-    fetch(`${SPEECH_SERVICE_URL}/health`).then(r => r.ok),
-    fetch(`${REASONING_SERVICE_URL}/health`).then(r => r.ok),
-  ]);
+  try {
+    const results = await Promise.allSettled([
+      fetch(`${MEDIA_SERVICE_URL}/health`, { 
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-cache'
+      }).then(r => {
+        console.log('Media health check:', r.status, r.ok);
+        return r.ok;
+      }).catch(err => {
+        console.error('Media health check failed:', err);
+        return false;
+      }),
+      fetch(`${SPEECH_SERVICE_URL}/health`, { 
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-cache'
+      }).then(r => {
+        console.log('Speech health check:', r.status, r.ok);
+        return r.ok;
+      }).catch(err => {
+        console.error('Speech health check failed:', err);
+        return false;
+      }),
+      fetch(`${REASONING_SERVICE_URL}/health`, { 
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-cache'
+      }).then(r => {
+        console.log('Reasoning health check:', r.status, r.ok);
+        return r.ok;
+      }).catch(err => {
+        console.error('Reasoning health check failed:', err);
+        return false;
+      }),
+    ]);
 
-  const media = results[0].status === 'fulfilled' && results[0].value;
-  const speech = results[1].status === 'fulfilled' && results[1].value;
-  const reasoning = results[2].status === 'fulfilled' && results[2].value;
+    const media = results[0].status === 'fulfilled' && results[0].value;
+    const speech = results[1].status === 'fulfilled' && results[1].value;
+    const reasoning = results[2].status === 'fulfilled' && results[2].value;
 
-  return {
-    media,
-    speech,
-    reasoning,
-    allHealthy: media && speech && reasoning,
-  };
+    console.log('Health check results:', { media, speech, reasoning });
+
+    return {
+      media,
+      speech,
+      reasoning,
+      allHealthy: media && speech && reasoning,
+    };
+  } catch (error) {
+    console.error('Health check error:', error);
+    return {
+      media: false,
+      speech: false,
+      reasoning: false,
+      allHealthy: false,
+    };
+  }
 }

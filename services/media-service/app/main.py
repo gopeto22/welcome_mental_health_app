@@ -23,10 +23,14 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Media Service", version="1.0.0")
 
-# CORS - locked to frontend only
+# CORS - allow frontend on multiple ports for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:8081",
+        "http://localhost:8082",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

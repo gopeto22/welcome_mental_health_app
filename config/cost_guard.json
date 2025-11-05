@@ -1,0 +1,26 @@
+{
+  "description": "Cost guardrails for API usage limits",
+  "limits": {
+    "daily_tts_chars": 200000,
+    "daily_llm_tokens": 100000,
+    "session_token_limit": 5000,
+    "session_tts_chars_limit": 10000
+  },
+  "providers": {
+    "groq_llm": {
+      "free_tier_tokens_per_minute": 14000,
+      "free_tier_tokens_per_day": 14400,
+      "note": "Groq API limits (approximate)"
+    },
+    "google_tts": {
+      "free_tier_chars_per_month": 4000000,
+      "standard_voice_price_per_million": 4.00,
+      "wavenet_voice_price_per_million": 16.00,
+      "note": "Google Cloud TTS pricing"
+    }
+  },
+  "warning_thresholds": {
+    "daily_tts_chars_warning": 180000,
+    "daily_llm_tokens_warning": 90000
+  }
+}

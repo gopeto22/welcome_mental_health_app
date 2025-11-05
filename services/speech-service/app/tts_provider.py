@@ -21,6 +21,16 @@ class TTSProvider(ABC):
 class GoogleTTSProvider(TTSProvider):
     """Phase A: Google Cloud TTS with Tamil voice"""
     
+    # Allowed Tamil voice names
+    ALLOWED_VOICES = {
+        "ta-IN-Standard-A",  # Female standard
+        "ta-IN-Standard-B",  # Male standard
+        "ta-IN-Wavenet-A",   # Female premium
+        "ta-IN-Wavenet-B",   # Male premium
+    }
+    
+    DEFAULT_VOICE = "ta-IN-Standard-A"
+    
     def __init__(self):
         # Set credentials path if provided
         creds_path = os.getenv("GOOGLE_TTS_CREDENTIALS_PATH")
@@ -29,19 +39,40 @@ class GoogleTTSProvider(TTSProvider):
         
         self.client = texttospeech.TextToSpeechClient()
     
+    def _validate_voice(self, voice: str) -> str:
+        """
+        Validate and normalize voice name.
+        Returns a valid Tamil voice name or default.
+        """
+        # If voice is just language code, use default
+        if voice == "ta-IN" or not voice:
+            return self.DEFAULT_VOICE
+        
+        # Check if voice is in allowed list
+        if voice in self.ALLOWED_VOICES:
+            return voice
+        
+        # Check if it's already a full voice name with language code
+        if voice.startswith("ta-IN-"):
+            # Might be malformed, log warning
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Voice '{voice}' not in allowed list. Using default: {self.DEFAULT_VOICE}")
+            return self.DEFAULT_VOICE
+        
+        # Otherwise, try appending -Standard-A if it looks like a base name
+        # But safer to just use default
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Invalid voice '{voice}'. Using default: {self.DEFAULT_VOICE}")
+        return self.DEFAULT_VOICE
+    
     async def synthesize(self, text: str, voice: str = "ta-IN") -> bytes:
         # Set up synthesis input
         synthesis_input = texttospeech.SynthesisInput(text=text)
         
-        # Voice configuration
-        # Tamil (India) voices: ta-IN-Standard-A (female), ta-IN-Standard-B (male)
-        # ta-IN-Wavenet-A, ta-IN-Wavenet-B (premium voices)
-        
-        # If voice is just language code (ta-IN), use default Standard-A
-        if voice == "ta-IN":
-            voice_name = "ta-IN-Standard-A"
-        else:
-            voice_name = voice  # Use the full voice name as provided
+        # Validate and get proper voice name
+        voice_name = self._validate_voice(voice)
         
         voice_params = texttospeech.VoiceSelectionParams(
             language_code="ta-IN",

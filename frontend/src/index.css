@@ -2,6 +2,120 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-First Animations */
+@keyframes breathe {
+  0%, 100% { 
+    transform: scale(1); 
+    opacity: 0.8; 
+  }
+  50% { 
+    transform: scale(1.15); 
+    opacity: 1; 
+  }
+}
+
+@keyframes pulse-thinking {
+  0%, 100% { 
+    opacity: 0.5; 
+    transform: scale(0.95); 
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.05); 
+  }
+}
+
+@keyframes listening {
+  0% { 
+    transform: scale(0.8); 
+    opacity: 0.6; 
+  }
+  50% { 
+    transform: scale(1.2); 
+    opacity: 1; 
+  }
+  100% { 
+    transform: scale(0.8); 
+    opacity: 0.6; 
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+.animate-pulse-thinking {
+  animation: pulse-thinking 1.5s ease-in-out infinite;
+}
+
+.animate-listening {
+  animation: listening 1s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* Accessibility: Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  button {
+    border: 2px solid currentColor !important;
+  }
+  
+  .voice-bubble {
+    border: 2px solid #000 !important;
+  }
+}
+
+/* Mobile-first tap target sizing */
+.tap-target {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px;
+}
+
+/* Focus indicators for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid hsl(200, 80%, 50%);
+  outline-offset: 2px;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
