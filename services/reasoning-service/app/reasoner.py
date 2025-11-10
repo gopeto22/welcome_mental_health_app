@@ -35,7 +35,7 @@ class GroqReasoner(Reasoner):
     async def generate(
         self,
         user_input: str,
-        conversation_history: list[str],
+        conversation_history: list[dict],  # List of {"role": "user"|"assistant", "content": str}
         locale: str = "ta-IN"
     ) -> str:
         # Determine language and set appropriate system prompt
@@ -102,14 +102,20 @@ Respond in English only. Remember to be warm and compassionate, not formal or pr
         # Build conversation messages
         messages = [{"role": "system", "content": system_prompt}]
         
-        # Add recent history (last 5 exchanges to keep context manageable)
-        history_window = conversation_history[-10:]  # Last 10 messages
-        for i, msg in enumerate(history_window):
-            role = "user" if i % 2 == 0 else "assistant"
-            messages.append({"role": role, "content": msg})
+        # Add conversation history (already has proper roles)
+        for msg in conversation_history:
+            messages.append({
+                "role": msg["role"], 
+                "content": msg["content"]
+            })
         
         # Add current user input
         messages.append({"role": "user", "content": user_input})
+        
+        # Debug logging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Sending {len(messages)} messages to Groq LLM (history: {len(conversation_history)})")
         
         # Generate response
         response = self.client.chat.completions.create(

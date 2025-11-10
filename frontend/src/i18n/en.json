@@ -6,7 +6,7 @@
     "exercises": "Exercises"
   },
   "banner": {
-    "demo": "This tool supports you between sessions. In an emergency call 044-46464646."
+    "demo": "This tool supports you between sessions. If you need urgent help, call NHS 111 (option 2) or 999 in an emergency."
   },
   "suds": {
     "title": "How distressed are you right now?",
@@ -33,29 +33,42 @@
   },
   "exercises": {
     "title": "Choose a grounding exercise:",
-    "general": {
-      "name": "General Grounding",
-      "duration": "4-5 minutes",
-      "emoji": "🧘"
-    },
     "breathing": {
       "name": "Paced Breathing",
-      "duration": "4-5 minutes",
-      "emoji": "🫁"
+      "description": "Calm breathing exercise",
+      "duration": "2-3 minutes",
+      "emoji": "�"
     },
-    "countdown": {
-      "name": "Countdown",
+    "focus": {
+      "name": "5-4-3-2-1 Grounding",
+      "description": "Focus on your senses",
       "duration": "3-4 minutes",
-      "emoji": "🔢"
+      "emoji": "👁️"
+    },
+    "general": {
+      "name": "General Grounding",
+      "description": "Sensory awareness",
+      "duration": "2-3 minutes",
+      "emoji": "🧘"
     }
   },
   "safety": {
-    "title": "Safety Support",
-    "intro": "I notice you're experiencing a high level of distress right now.",
-    "message": "Your safety and wellbeing are most important. Would you like to:",
-    "callSupport": "Call support right now",
+    "title": "I'm concerned about your safety",
+    "intro": "Let's use the plan we agreed.",
+    "step1": {
+      "title": "Step 1: Talk to your safe person",
+      "description": "Contact your named safe person (neighbour, friend, partner)"
+    },
+    "step2": {
+      "title": "Step 2: NHS 111 - Mental Health Option",
+      "description": "If you're at risk of hurting yourself or someone else, call NHS 111 and press option 2, or contact your GP"
+    },
+    "step3": {
+      "title": "Step 3: Emergency Services",
+      "description": "If that risk feels immediate, call 999 or go to Accident & Emergency"
+    },
     "tryGrounding": "Try a grounding exercise",
-    "returnChat": "Or, if you prefer, return to chat"
+    "returnChat": "Return to chat"
   },
   "postExercise": {
     "title": "How are you feeling now?",

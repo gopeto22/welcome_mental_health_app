@@ -81,33 +81,37 @@ export interface TTSResponse {
 
 // Exercise Types
 
-export type ExerciseKey = "general" | "breathing" | "countdown";
+export type ExerciseKey = "breathing" | "focus" | "general";
 
 export interface Exercise {
   key: ExerciseKey;
   titleKey: string;
   descKey: string;
+  durationKey: string;
   icon: string;
 }
 
 export const EXERCISES: Exercise[] = [
   {
-    key: "general",
-    titleKey: "exercises.general",
-    descKey: "exercises.general_desc",
-    icon: "🧘"
-  },
-  {
     key: "breathing",
-    titleKey: "exercises.breathing",
-    descKey: "exercises.breathing_desc",
-    icon: "🫁"
+    titleKey: "exercises.breathing.name",
+    descKey: "exercises.breathing.description",
+    durationKey: "exercises.breathing.duration",
+    icon: "🗣️"
   },
   {
-    key: "countdown",
-    titleKey: "exercises.countdown",
-    descKey: "exercises.countdown_desc",
-    icon: "🔢"
+    key: "focus",
+    titleKey: "exercises.focus.name",
+    descKey: "exercises.focus.description",
+    durationKey: "exercises.focus.duration",
+    icon: "👁️"
+  },
+  {
+    key: "general",
+    titleKey: "exercises.general.name",
+    descKey: "exercises.general.description",
+    durationKey: "exercises.general.duration",
+    icon: "🧘"
   }
 ];
 

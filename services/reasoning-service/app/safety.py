@@ -104,15 +104,21 @@ class SafetyGuardrails:
                 issues.append("Contains diagnosis")
                 has_medical_advice = True
         
-        # Check for medication advice
+        # Check for medication advice (with context)
         medication_keywords = [
             "மருந்து", "மாத்திரை", "எடுக்க வேண்டும்",
-            "medication", "pill", "prescription", "take", "drug"
+            "medication", "pill", "prescription", "drug"
         ]
         for kw in medication_keywords:
             if kw.lower() in response_lower:
                 issues.append("Contains medication advice")
                 has_medical_advice = True
+        
+        # Check for "take" but only in medication context (not "take a breath")
+        if re.search(r'\btake\s+(a|some|your)?\s*(medication|pill|drug|tablet)', response_lower):
+            if "Contains medication advice" not in issues:
+                issues.append("Contains medication advice")
+            has_medical_advice = True
         
         # Check for dismissive language
         dismissive_patterns = [

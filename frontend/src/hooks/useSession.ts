@@ -92,9 +92,10 @@ export function useSession(): UseSessionReturn {
       const currentState = stateRef.current;
       
       // Prepare transcript window (last 10 messages)
+      // FIXED: Build transcript with proper role markers
       const transcriptWindow = [...currentState.messages, userMessage]
         .slice(-10)
-        .map(m => m.text);
+        .map(m => `${m.role}: ${m.text}`);
 
       console.log("Sending to /respond:", {
         session_id: currentState.sessionId,

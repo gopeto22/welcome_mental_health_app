@@ -27,22 +27,24 @@ export function MobileApp() {
     }, 30000); // Every 30 seconds
 
     return () => clearInterval(interval);
-  }, [actions.updateServiceStatus]);
+  }, [actions]);
 
   // Sync locale between useSession and useTranslation
   useEffect(() => {
     actions.setLocale(locale);
-  }, [locale, actions.setLocale]);
+  }, [locale, actions]);
 
   // Play exercise audio when exercise is selected
   useEffect(() => {
     if (state.mode === "exercise" && state.selectedExercise) {
-      const audioUrl = `/audio/exercises/${state.selectedExercise}.mp3`;
+      // Use locale-specific audio files: breathing_en.mp3 or breathing_ta.mp3
+      const localeSuffix = locale === 'en-GB' ? 'en' : 'ta';
+      const audioUrl = `/audio/exercises/${state.selectedExercise}_${localeSuffix}.mp3`;
       
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
         audioRef.current.play().then(() => {
-          console.log("Exercise audio playing:", state.selectedExercise);
+          console.log("Exercise audio playing:", state.selectedExercise, "locale:", locale);
           actions.setSubstate("speaking");
         }).catch(err => {
           console.error("Failed to play exercise audio:", err);
@@ -58,7 +60,7 @@ export function MobileApp() {
         };
       }
     }
-  }, [state.mode, state.selectedExercise, actions.setSubstate]);
+  }, [state.mode, state.selectedExercise, locale, actions]);
 
   // Render appropriate screen based on mode
   const renderMainScreen = () => {
@@ -75,10 +77,6 @@ export function MobileApp() {
       case "safety":
         return (
           <SafetyScreen
-            onCallSupport={() => {
-              // Open tel: link
-              window.location.href = "tel:044-46464646";
-            }}
             onTryGrounding={() => {
               actions.exitSafety();
               actions.toggleExercises();

@@ -133,10 +133,23 @@ async def generate_response(request: RespondRequest):
         if not reasoner or not safety or not crisis_router:
             raise HTTPException(status_code=503, detail="Service not initialized")
         
-        # Combine transcript window
-        user_input = " ".join(request.transcript_window)
+        # Parse transcript window - now includes role prefixes like "user: text" or "assistant: text"
+        conversation_history = []
+        user_input = ""
         
-        logger.info(f"Processing request for session {request.session_id}, input length: {len(user_input)}")
+        for msg in request.transcript_window:
+            if msg.startswith("user: "):
+                text = msg[6:]  # Remove "user: " prefix
+                conversation_history.append({"role": "user", "content": text})
+                user_input = text  # Track last user message
+            elif msg.startswith("assistant: "):
+                text = msg[11:]  # Remove "assistant: " prefix
+                conversation_history.append({"role": "assistant", "content": text})
+        
+        if not user_input:
+            raise HTTPException(status_code=400, detail="No user messages in transcript")
+        
+        logger.info(f"Processing request for session {request.session_id}, input length: {len(user_input)}, history: {len(conversation_history)} messages")
         
         # Use crisis router for immediate crisis detection
         crisis_response, crisis_flags_dict = crisis_router.route_response(user_input, request.locale)
@@ -161,9 +174,12 @@ async def generate_response(request: RespondRequest):
             )
         else:
             # No crisis - generate LLM response
+            # Pass all conversation history except the last user message (it's in user_input)
+            history_for_llm = conversation_history[:-1] if len(conversation_history) > 0 else []
+            
             reply_text = await reasoner.generate(
                 user_input=user_input,
-                conversation_history=request.transcript_window,
+                conversation_history=history_for_llm,
                 locale=request.locale
             )
             

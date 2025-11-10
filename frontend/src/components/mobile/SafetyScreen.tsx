@@ -10,7 +10,6 @@ import { useTranslation } from "@/hooks/useTranslation";
 import type { ServiceStatus } from "@/types/mobile";
 
 interface SafetyScreenProps {
-  onCallSupport: () => void;
   onTryGrounding: () => void;
   onReturn: () => void;
   serviceStatus: ServiceStatus;
@@ -18,7 +17,6 @@ interface SafetyScreenProps {
 }
 
 export function SafetyScreen({
-  onCallSupport,
   onTryGrounding,
   onReturn,
   serviceStatus,
@@ -49,32 +47,47 @@ export function SafetyScreen({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col justify-center px-6 py-8">
-        {/* Compassionate Copy */}
+      <div className="flex-1 overflow-y-auto px-6 py-8">
+        {/* Intro */}
+        <p className="text-lg text-gray-800 leading-relaxed mb-6">
+          {t("safety.intro")}
+        </p>
+
+        {/* 3-Step Safety Plan */}
         <div className="space-y-4 mb-8">
-          <p className="text-lg text-gray-800 leading-relaxed">
-            {t("safety.intro")}
-          </p>
-          <p className="text-lg text-gray-800 leading-relaxed">
-            {t("safety.step")}
-          </p>
-          <p className="text-lg text-gray-800 leading-relaxed">
-            {t("safety.help")}
-          </p>
+          {/* Step 1: Safe Person */}
+          <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500 shadow-sm">
+            <h3 className="font-semibold text-gray-900 mb-2">
+              {t("safety.step1.title")}
+            </h3>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {t("safety.step1.description")}
+            </p>
+          </div>
+
+          {/* Step 2: NHS 111 */}
+          <div className="bg-white rounded-lg p-4 border-l-4 border-green-500 shadow-sm">
+            <h3 className="font-semibold text-gray-900 mb-2">
+              {t("safety.step2.title")}
+            </h3>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {t("safety.step2.description")}
+            </p>
+          </div>
+
+          {/* Step 3: Emergency Services */}
+          <div className="bg-white rounded-lg p-4 border-l-4 border-red-500 shadow-sm">
+            <h3 className="font-semibold text-gray-900 mb-2">
+              {t("safety.step3.title")}
+            </h3>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {t("safety.step3.description")}
+            </p>
+          </div>
         </div>
 
         {/* Action Buttons */}
         <div className="space-y-3">
-          {/* Call Support Button */}
-          <Button
-            onClick={onCallSupport}
-            className="w-full h-14 text-lg font-medium bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 tap-target"
-            aria-label={t("safety.call")}
-          >
-            <Phone className="h-5 w-5" />
-            {t("safety.call")}
-          </Button>
-
           {/* Try Grounding Button */}
           <Button
             onClick={onTryGrounding}

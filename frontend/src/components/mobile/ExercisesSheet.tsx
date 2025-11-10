@@ -71,8 +71,11 @@ export function ExercisesSheet({ isOpen, onClose, onSelect }: ExercisesSheetProp
                   <h3 className="font-semibold text-gray-900 mb-1">
                     {t(exercise.titleKey)}
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 mb-1">
                     {t(exercise.descKey)}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {t(exercise.durationKey)}
                   </p>
                 </div>
               </div>
