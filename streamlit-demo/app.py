@@ -7,6 +7,7 @@ Reproduces mobile prototype core experience for clinician testing
 import streamlit as st
 import requests
 import json
+import os
 from pathlib import Path
 from datetime import datetime
 import base64
@@ -15,9 +16,13 @@ import base64
 # CONFIGURATION
 # ============================================================================
 
-# API Endpoints (using existing backend services)
-SPEECH_SERVICE_URL = "http://localhost:8002"
-REASONING_SERVICE_URL = "http://localhost:8003"
+# Demo Mode Configuration
+# Set DEMO_MODE=true to run without backend services (for Streamlit Cloud)
+DEMO_MODE = os.getenv("DEMO_MODE", "true").lower() == "true"
+
+# API Endpoints (only used when DEMO_MODE=false)
+SPEECH_SERVICE_URL = os.getenv("SPEECH_SERVICE_URL", "http://localhost:8002")
+REASONING_SERVICE_URL = os.getenv("REASONING_SERVICE_URL", "http://localhost:8003")
 
 # Translations
 TRANSLATIONS = {
@@ -103,6 +108,11 @@ def get_audio_path(exercise_key: str) -> Path:
     """Get path to exercise audio file"""
     locale = st.session_state.get("locale", "en-GB")
     audio_file = EXERCISES[exercise_key][locale]["audio"]
+    # Check local audio directory first (for Streamlit Cloud)
+    local_audio_path = Path(__file__).parent / "audio" / audio_file
+    if local_audio_path.exists():
+        return local_audio_path
+    # Fallback to original path (for local development)
     audio_path = Path(__file__).parent.parent / "frontend" / "public" / "audio" / "exercises" / audio_file
     return audio_path
 
@@ -114,8 +124,73 @@ def get_audio_base64(audio_path: Path) -> str:
         return base64.b64encode(audio_bytes).decode()
     return None
 
+def get_demo_response(user_input: str, conversation_history: list) -> dict:
+    """Generate demo response when backend is not available"""
+    user_lower = user_input.lower()
+    
+    # Crisis keywords detection
+    crisis_keywords = ["hurt myself", "kill myself", "end it", "suicide", "die", "harm myself"]
+    if any(keyword in user_lower for keyword in crisis_keywords):
+        return {
+            "reply_text": "I'm really concerned about what you've shared. Your safety is the most important thing right now.",
+            "risk_flags": {"needs_escalation": True}
+        }
+    
+    # Simple contextual responses for demo
+    if any(word in user_lower for word in ["worried", "anxious", "nervous", "scared"]):
+        responses = [
+            "I hear that you're feeling worried. That's a really difficult feeling to sit with. Can you tell me more about what's making you feel this way?",
+            "It sounds like anxiety is really present for you right now. That takes a lot of courage to share. What thoughts are coming up for you?",
+            "I understand you're feeling anxious. Let's take this step by step together. What would help you feel even a little bit safer right now?"
+        ]
+    elif any(word in user_lower for word in ["sad", "depressed", "down", "hopeless"]):
+        responses = [
+            "I'm hearing that you're feeling really low right now. Thank you for trusting me with this. Can you help me understand what's been happening?",
+            "It sounds like things feel heavy for you at the moment. I'm here with you. What's been the hardest part?",
+            "That sounds really difficult to carry. You don't have to go through this alone. Would it help to talk about what's contributing to these feelings?"
+        ]
+    elif any(word in user_lower for word in ["angry", "frustrated", "mad", "irritated"]):
+        responses = [
+            "I can hear that you're feeling frustrated. Those feelings are completely valid. What's been triggering this anger?",
+            "It sounds like something has really upset you. Thank you for sharing that with me. Can you tell me more about what happened?",
+            "I understand you're feeling angry. That emotion is telling us something important. What do you think it's connected to?"
+        ]
+    elif any(word in user_lower for word in ["better", "good", "ok", "fine", "alright"]):
+        responses = [
+            "I'm glad to hear things feel a bit better. What's changed for you?",
+            "That's good to hear. What helped you feel this way?",
+            "I'm pleased things are feeling more manageable. What's been helpful?"
+        ]
+    elif any(word in user_lower for word in ["exercise", "breathing", "grounding"]):
+        responses = [
+            "That's a wonderful idea to try a grounding exercise. You can find some options in the sidebar. Would you like to try one now?",
+            "Grounding exercises can be really helpful when we're feeling overwhelmed. I have some audio exercises available in the sidebar if you'd like to try them.",
+            "Yes, let's try a grounding technique. Check the sidebar for some guided exercises that might help you feel more present."
+        ]
+    else:
+        responses = [
+            "Thank you for sharing that with me. I'm here to listen. Can you tell me more about how you're feeling?",
+            "I hear you. What's on your mind right now?",
+            "I'm listening. How can I support you in this moment?",
+            "That's important information. How are you coping with all of this?"
+        ]
+    
+    # Pick a response based on conversation length to add variety
+    response_idx = len(conversation_history) % len(responses)
+    
+    return {
+        "reply_text": responses[response_idx],
+        "risk_flags": {"needs_escalation": False}
+    }
+
 def call_reasoning_api(user_input: str, conversation_history: list) -> dict:
-    """Call reasoning service API"""
+    """Call reasoning service API or use demo responses"""
+    
+    # Use demo mode if enabled
+    if DEMO_MODE:
+        return get_demo_response(user_input, conversation_history)
+    
+    # Otherwise, call actual API
     locale = st.session_state.get("locale", "en-GB")
     session_id = st.session_state.get("session_id", "streamlit-demo")
     
@@ -140,10 +215,7 @@ def call_reasoning_api(user_input: str, conversation_history: list) -> dict:
         return response.json()
     except Exception as e:
         st.error(f"API Error: {e}")
-        return {
-            "reply_text": "I'm having trouble connecting right now. Please try again.",
-            "risk_flags": {"needs_escalation": False}
-        }
+        return get_demo_response(user_input, conversation_history)
 
 def check_safety_trigger(suds: int) -> bool:
     """Check if safety plan should be triggered"""
@@ -342,6 +414,10 @@ def main():
     
     # Initialize session state
     init_session_state()
+    
+    # Show demo mode notice if enabled
+    if DEMO_MODE:
+        st.info("ℹ️ **Demo Mode**: This is a demonstration version with simulated responses. Grounding exercises with audio are fully functional.")
     
     # Render language toggle
     render_language_toggle()
