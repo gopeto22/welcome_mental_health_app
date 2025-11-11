@@ -263,6 +263,12 @@ def render_suds_screen():
     st.title(t("title"))
     st.caption(t("subtitle"))
     
+    # Show mode indicator
+    if DEMO_MODE:
+        st.info("🎭 **Demo Mode**: Using simulated responses for testing. Contact maintainer to enable real AI.")
+    else:
+        st.success("🤖 **Real AI Mode**: Connected to live Groq AI backend with therapeutic reasoning.")
+    
     st.markdown("---")
     
     st.subheader(t("suds_label"))
@@ -321,6 +327,12 @@ def render_safety_plan():
 def render_chat_interface():
     """Render main chat interface"""
     st.title(t("title"))
+    
+    # Show mode indicator (compact version for chat screen)
+    if DEMO_MODE:
+        st.caption("🎭 Demo Mode - Simulated responses")
+    else:
+        st.caption("🤖 Real AI Mode - Live Groq backend")
     
     # Display conversation history
     for msg in st.session_state.messages:
