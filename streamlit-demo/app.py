@@ -136,37 +136,58 @@ def get_demo_response(user_input: str, conversation_history: list) -> dict:
             "risk_flags": {"needs_escalation": True}
         }
     
-    # Simple contextual responses for demo
-    if any(word in user_lower for word in ["worried", "anxious", "nervous", "scared"]):
+    # Contextual responses - check in priority order (most specific first)
+    
+    # Trauma/PTSD symptoms
+    if any(word in user_lower for word in ["flashback", "nightmare", "reliving", "trauma", "triggered"]):
+        responses = [
+            "I'm sorry you're experiencing this flashback. That must be really frightening. You're safe right now. Can you tell me what you're noticing in your body?",
+            "Nightmares can be so distressing, especially when they bring back difficult memories. I'm here with you. Would it help to talk about what you're experiencing?",
+            "Thank you for telling me about this. When we have flashbacks or nightmares, it can feel very overwhelming. What would help you feel more grounded right now?"
+        ]
+    # Physical distress symptoms
+    elif any(word in user_lower for word in ["unwell", "sick", "nauseous", "dizzy", "shaking", "trembling", "chest pain", "can't breathe"]):
+        responses = [
+            "I hear that you're feeling physically unwell. Sometimes our bodies hold a lot of stress. Can you describe what you're experiencing?",
+            "It sounds like you're noticing some physical symptoms. That can be really uncomfortable. Are you somewhere safe right now?",
+            "Thank you for sharing that. Physical symptoms can be a sign that our body is responding to stress. What sensations are you noticing?"
+        ]
+    # Anxiety/fear
+    elif any(word in user_lower for word in ["worried", "anxious", "nervous", "scared", "afraid", "panic", "overwhelmed"]):
         responses = [
             "I hear that you're feeling worried. That's a really difficult feeling to sit with. Can you tell me more about what's making you feel this way?",
             "It sounds like anxiety is really present for you right now. That takes a lot of courage to share. What thoughts are coming up for you?",
             "I understand you're feeling anxious. Let's take this step by step together. What would help you feel even a little bit safer right now?"
         ]
-    elif any(word in user_lower for word in ["sad", "depressed", "down", "hopeless"]):
+    # Depression/low mood
+    elif any(word in user_lower for word in ["sad", "depressed", "down", "hopeless", "empty", "numb", "worthless"]):
         responses = [
             "I'm hearing that you're feeling really low right now. Thank you for trusting me with this. Can you help me understand what's been happening?",
             "It sounds like things feel heavy for you at the moment. I'm here with you. What's been the hardest part?",
             "That sounds really difficult to carry. You don't have to go through this alone. Would it help to talk about what's contributing to these feelings?"
         ]
-    elif any(word in user_lower for word in ["angry", "frustrated", "mad", "irritated"]):
+    # Anger/frustration
+    elif any(word in user_lower for word in ["angry", "frustrated", "mad", "irritated", "rage", "furious"]):
         responses = [
             "I can hear that you're feeling frustrated. Those feelings are completely valid. What's been triggering this anger?",
             "It sounds like something has really upset you. Thank you for sharing that with me. Can you tell me more about what happened?",
             "I understand you're feeling angry. That emotion is telling us something important. What do you think it's connected to?"
         ]
-    elif any(word in user_lower for word in ["better", "good", "ok", "fine", "alright"]):
+    # Positive/improvement (but check it's not sarcastic)
+    elif any(word in user_lower for word in ["better", "improving", "helped"]) and not any(word in user_lower for word in ["not", "no", "never", "can't"]):
         responses = [
             "I'm glad to hear things feel a bit better. What's changed for you?",
             "That's good to hear. What helped you feel this way?",
             "I'm pleased things are feeling more manageable. What's been helpful?"
         ]
-    elif any(word in user_lower for word in ["exercise", "breathing", "grounding"]):
+    # Request for exercises
+    elif any(word in user_lower for word in ["exercise", "breathing", "grounding", "calm down", "relax"]):
         responses = [
             "That's a wonderful idea to try a grounding exercise. You can find some options in the sidebar. Would you like to try one now?",
             "Grounding exercises can be really helpful when we're feeling overwhelmed. I have some audio exercises available in the sidebar if you'd like to try them.",
             "Yes, let's try a grounding technique. Check the sidebar for some guided exercises that might help you feel more present."
         ]
+    # Default - neutral, supportive responses
     else:
         responses = [
             "Thank you for sharing that with me. I'm here to listen. Can you tell me more about how you're feeling?",
