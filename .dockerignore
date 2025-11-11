@@ -1,0 +1,66 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Logs
+logs/
+*.log
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Frontend (not needed for backend)
+frontend/
+streamlit-demo/
+demos/
+
+# Test files
+test/
+tests/
+*.test.py
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Deployment artifacts
+deploy-package/
+*.tar.gz
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Assets (if not needed)
+assets/audio_human/
+assets/audio_v0/
+assets/meta_v0/
