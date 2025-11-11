@@ -12,6 +12,7 @@ import type {
   TTSResponse,
   Locale,
 } from "@/types/mobile";
+import { DEMO_MODE, getDemoResponse } from "./demoMode";
 
 const SPEECH_SERVICE_URL = import.meta.env.VITE_SPEECH_SERVICE_URL || "http://localhost:8002";
 const REASONING_SERVICE_URL = import.meta.env.VITE_REASONING_SERVICE_URL || "http://localhost:8003";
@@ -43,6 +44,13 @@ async function retryFetch<T>(
  * Generate AI response with safety checks
  */
 export async function postRespond(request: RespondRequest): Promise<RespondResponse> {
+  // Use demo mode if backend not configured
+  if (DEMO_MODE) {
+    console.log("🎭 Demo mode: Using simulated AI response");
+    const userInput = request.transcript_window[request.transcript_window.length - 1]?.replace(/^user:\s*/i, '') || '';
+    return getDemoResponse(userInput, request.transcript_window);
+  }
+  
   return retryFetch(async () => {
     const response = await fetch(`${REASONING_SERVICE_URL}/respond`, {
       method: "POST",
