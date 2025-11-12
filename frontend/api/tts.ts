@@ -3,7 +3,7 @@ export const config = {
   runtime: 'edge',
 };
 
-const BACKEND_URL = 'http://13.40.70.207';
+const BACKEND_URL = 'http://ec2-13-40-70-207.eu-west-2.compute.amazonaws.com';
 
 export default async function handler(request: Request) {
   // Handle OPTIONS preflight
