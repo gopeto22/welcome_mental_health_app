@@ -1,4 +1,4 @@
-// Vercel Edge Function - Audio File Proxy
+// Vercel Edge Function - Audio Cache Proxy
 export const config = {
   runtime: 'edge',
 };
@@ -7,20 +7,18 @@ const BACKEND_URL = 'http://ec2-13-40-70-207.eu-west-2.compute.amazonaws.com';
 
 export default async function handler(request: Request) {
   try {
-    // Extract the audio filename from the URL
+    // Extract the filename from the URL
+    // URL will be like: /api/audio/cache/abc123.mp3
     const url = new URL(request.url);
-    const audioPath = url.pathname; // e.g., /api/audio/abc123.mp3
-    
-    // Remove /api prefix to get the backend path
-    const backendPath = audioPath.replace('/api', '');
+    const filename = url.pathname.split('/').pop(); // Get the last part
     
     // Forward the request to EC2 backend
-    const response = await fetch(`${BACKEND_URL}${backendPath}`, {
+    const response = await fetch(`${BACKEND_URL}/audio/cache/${filename}`, {
       method: 'GET',
     });
 
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: 'Audio file not found' }), {
+      return new Response(JSON.stringify({ error: 'Audio file not found', file: filename }), {
         status: 404,
         headers: {
           'Content-Type': 'application/json',
