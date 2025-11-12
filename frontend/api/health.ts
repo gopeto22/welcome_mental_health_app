@@ -14,7 +14,26 @@ export default async function handler(request: Request) {
       },
     });
 
-    const data = await response.json();
+    // Get response text first
+    const text = await response.text();
+    
+    // Try to parse as JSON
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      // If not JSON, return the text as error
+      return new Response(JSON.stringify({ 
+        error: 'Invalid response from backend', 
+        details: text.substring(0, 200) 
+      }), {
+        status: 502,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
 
     return new Response(JSON.stringify(data), {
       status: response.status,
