@@ -99,11 +99,15 @@ export async function postSTT(request: STTRequest): Promise<STTResponse> {
 
 /**
  * POST /tts (Speech Service)
- * Convert text to audio
+ * Convert text to audio with optimal voice settings
  */
 export async function postTTS(request: TTSRequest): Promise<TTSResponse> {
   return retryFetch(async () => {
-    const voice = request.voice || getDefaultVoice(request.locale);
+    // Get optimal voice settings for locale
+    const voiceConfig = getDefaultVoice(request.locale);
+    const voice = request.voice || voiceConfig.voice;
+    const speed = voiceConfig.speed;
+    const pitch = voiceConfig.pitch;
     
     const response = await fetch(`${SPEECH_SERVICE_URL}/tts/speak`, {
       method: "POST",
@@ -113,7 +117,8 @@ export async function postTTS(request: TTSRequest): Promise<TTSResponse> {
       body: JSON.stringify({
         text: request.text,
         voice,
-        locale: request.locale,
+        speed,
+        pitch,
       }),
     });
 
@@ -165,16 +170,29 @@ export async function checkServiceHealth(): Promise<{
 }
 
 /**
- * Get default voice for locale
+ * Get default voice for locale with optimal settings
  */
-function getDefaultVoice(locale: Locale): string {
+function getDefaultVoice(locale: Locale): { voice: string; speed: number; pitch: number } {
   switch (locale) {
     case "en-GB":
-      return "en-GB-Wavenet-C";
+      // Use Neural2-F (female, natural, empathetic) with speed 1.0 and pitch -2.0
+      return {
+        voice: "en-GB-Neural2-F",
+        speed: 1.0,
+        pitch: -2.0
+      };
     case "ta-IN":
-      return "ta-IN-Standard-A";
+      return {
+        voice: "ta-IN-Standard-A",
+        speed: 0.9,
+        pitch: 0.0
+      };
     default:
-      return "en-GB-Wavenet-C";
+      return {
+        voice: "en-GB-Neural2-F",
+        speed: 1.0,
+        pitch: -2.0
+      };
   }
 }
 

@@ -122,6 +122,8 @@ async def transcribe_chunk(file: UploadFile = File(...)):
 class TTSRequest(BaseModel):
     text: str
     voice: str = "ta-IN"
+    speed: float = 1.0  # Speaking rate (0.25-4.0)
+    pitch: float = 0.0  # Pitch in semitones (-20.0 to 20.0)
 
 
 class TTSResponse(BaseModel):
@@ -133,8 +135,8 @@ class TTSResponse(BaseModel):
 @app.post("/tts/speak", response_model=TTSResponse)
 async def generate_speech(request: TTSRequest):
     """
-    Generate Tamil speech from text.
-    Results are cached by (text, voice) hash.
+    Generate speech from text with configurable voice, speed, and pitch.
+    Results are cached by (text, voice, speed, pitch) hash.
     """
     start_time = datetime.utcnow()
     
@@ -142,19 +144,24 @@ async def generate_speech(request: TTSRequest):
         if not tts_provider:
             raise HTTPException(status_code=503, detail="TTS provider not initialized")
         
-        # Check cache
+        # Check cache - include speed and pitch in cache key
         cache_key = hashlib.sha256(
-            f"{request.text}:{request.voice}".encode()
+            f"{request.text}:{request.voice}:{request.speed}:{request.pitch}".encode()
         ).hexdigest()[:16]
         cache_path = AUDIO_CACHE_DIR / f"{cache_key}.mp3"
         
         cached = cache_path.exists()
         
         if not cached:
-            logger.info(f"Generating TTS for text length: {len(request.text)}")
+            logger.info(f"Generating TTS for text length: {len(request.text)}, voice: {request.voice}, speed: {request.speed}, pitch: {request.pitch}")
             
-            # Generate audio
-            audio_data = await tts_provider.synthesize(request.text, voice=request.voice)
+            # Generate audio with custom parameters
+            audio_data = await tts_provider.synthesize(
+                request.text, 
+                voice=request.voice,
+                speed=request.speed,
+                pitch=request.pitch
+            )
             
             # Save to cache
             with open(cache_path, 'wb') as f:
@@ -164,12 +171,13 @@ async def generate_speech(request: TTSRequest):
         
         elapsed = (datetime.utcnow() - start_time).total_seconds()
         
-        # Estimate duration (rough approximation)
-        duration_ms = len(request.text) * 100  # ~100ms per character
+        # Estimate duration (adjust for speed)
+        base_duration = len(request.text) * 100  # ~100ms per character
+        adjusted_duration = int(base_duration / request.speed)
         
         return TTSResponse(
             file_url=f"/audio/cache/{cache_key}.mp3",
-            duration_ms=duration_ms,
+            duration_ms=adjusted_duration,
             cached=cached
         )
         

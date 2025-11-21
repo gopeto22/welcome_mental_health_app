@@ -19,17 +19,24 @@ class TTSProvider(ABC):
 
 
 class GoogleTTSProvider(TTSProvider):
-    """Phase A: Google Cloud TTS with Tamil voice"""
+    """Phase A: Google Cloud TTS with Tamil and English voices"""
     
-    # Allowed Tamil voice names
+    # Allowed voice names
     ALLOWED_VOICES = {
+        # Tamil voices
         "ta-IN-Standard-A",  # Female standard
         "ta-IN-Standard-B",  # Male standard
         "ta-IN-Wavenet-A",   # Female premium
         "ta-IN-Wavenet-B",   # Male premium
+        # English voices
+        "en-GB-Wavenet-C",   # Female, warm and clear
+        "en-GB-Wavenet-B",   # Male, professional
+        "en-GB-Neural2-F",   # Female, natural and empathetic (PREFERRED)
+        "en-GB-Neural2-D",   # Male, reassuring and clear
     }
     
     DEFAULT_VOICE = "ta-IN-Standard-A"
+    DEFAULT_EN_VOICE = "en-GB-Neural2-F"
     
     def __init__(self):
         # Set credentials path if provided
@@ -39,52 +46,71 @@ class GoogleTTSProvider(TTSProvider):
         
         self.client = texttospeech.TextToSpeechClient()
     
-    def _validate_voice(self, voice: str) -> str:
+    def _validate_voice(self, voice: str) -> tuple[str, str]:
         """
         Validate and normalize voice name.
-        Returns a valid Tamil voice name or default.
+        Returns (voice_name, language_code) tuple.
         """
         # If voice is just language code, use default
         if voice == "ta-IN" or not voice:
-            return self.DEFAULT_VOICE
+            return self.DEFAULT_VOICE, "ta-IN"
+        
+        if voice == "en-GB":
+            return self.DEFAULT_EN_VOICE, "en-GB"
         
         # Check if voice is in allowed list
         if voice in self.ALLOWED_VOICES:
-            return voice
+            # Extract language code from voice name
+            lang_code = "-".join(voice.split("-")[:2])
+            return voice, lang_code
         
-        # Check if it's already a full voice name with language code
-        if voice.startswith("ta-IN-"):
+        # Check if it's a language prefix we support
+        if voice.startswith("ta-IN-") or voice.startswith("en-GB-"):
             # Might be malformed, log warning
             import logging
             logger = logging.getLogger(__name__)
-            logger.warning(f"Voice '{voice}' not in allowed list. Using default: {self.DEFAULT_VOICE}")
-            return self.DEFAULT_VOICE
+            lang = "ta-IN" if voice.startswith("ta-IN") else "en-GB"
+            default = self.DEFAULT_VOICE if lang == "ta-IN" else self.DEFAULT_EN_VOICE
+            logger.warning(f"Voice '{voice}' not in allowed list. Using default: {default}")
+            return default, lang
         
-        # Otherwise, try appending -Standard-A if it looks like a base name
-        # But safer to just use default
+        # Otherwise use default
         import logging
         logger = logging.getLogger(__name__)
         logger.warning(f"Invalid voice '{voice}'. Using default: {self.DEFAULT_VOICE}")
-        return self.DEFAULT_VOICE
+        return self.DEFAULT_VOICE, "ta-IN"
     
-    async def synthesize(self, text: str, voice: str = "ta-IN") -> bytes:
+    async def synthesize(
+        self, 
+        text: str, 
+        voice: str = "ta-IN",
+        speed: float = 1.0,
+        pitch: float = 0.0
+    ) -> bytes:
         # Set up synthesis input
         synthesis_input = texttospeech.SynthesisInput(text=text)
         
-        # Validate and get proper voice name
-        voice_name = self._validate_voice(voice)
+        # Validate and get proper voice name and language
+        voice_name, lang_code = self._validate_voice(voice)
+        
+        # Determine gender based on voice name
+        # F-suffix or Female names = FEMALE, otherwise MALE
+        if "-F" in voice_name or "-A" in voice_name or "-C" in voice_name:
+            gender = texttospeech.SsmlVoiceGender.FEMALE
+        else:
+            gender = texttospeech.SsmlVoiceGender.MALE
         
         voice_params = texttospeech.VoiceSelectionParams(
-            language_code="ta-IN",
+            language_code=lang_code,
             name=voice_name,
-            ssml_gender=texttospeech.SsmlVoiceGender.FEMALE
+            ssml_gender=gender
         )
         
-        # Audio configuration
+        # Audio configuration with custom speed and pitch
         audio_config = texttospeech.AudioConfig(
             audio_encoding=texttospeech.AudioEncoding.MP3,
-            speaking_rate=0.9,  # Slightly slower for clarity
-            pitch=0.0
+            speaking_rate=speed,  # Configurable speed
+            pitch=pitch  # Configurable pitch (in semitones)
         )
         
         # Perform synthesis

@@ -70,31 +70,32 @@ export function Composer({ onSend, onMicStart, onMicStop, isListening, isDisable
   return (
     <div className="border-t border-gray-200 bg-white p-4">
       {isListening ? (
-        /* Recording Mode */
+        /* Listening Mode - Toggle to Stop */
         <div className="flex items-center gap-3">
           <div className="flex-1 flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500 animate-listening" />
-            <span className="text-sm text-gray-700">
+            <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-sm text-gray-700 font-medium">
               {t("composer.listening")} {formatTime(recordingTime)}
             </span>
           </div>
           <Button
             onClick={handleMicClick}
-            className="tap-target bg-red-500 hover:bg-red-600 text-white"
-            aria-label={t("mic.stop")}
+            className="tap-target bg-red-500 hover:bg-red-600 text-white h-12 px-6 rounded-full transition-all"
+            aria-label="Stop listening"
           >
-            <MicOff className="h-5 w-5" />
+            <MicOff className="h-5 w-5 mr-2" />
+            <span className="font-medium">Stop</span>
           </Button>
         </div>
       ) : (
-        /* Text Input Mode */
+        /* Text Input Mode with Start Button */
         <div className="flex items-center gap-2">
           <Input
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={isDisabled ? t("composer.offline") : t("composer.placeholder")}
-            disabled={isDisabled}
+            disabled={isDisabled || isListening}
             className="flex-1 h-12 text-base"
             aria-label={t("composer.placeholder")}
           />
@@ -103,7 +104,7 @@ export function Composer({ onSend, onMicStart, onMicStop, isListening, isDisable
             <Button
               onClick={handleSend}
               disabled={isDisabled}
-              className="tap-target bg-blue-600 hover:bg-blue-700 text-white"
+              className="tap-target bg-blue-600 hover:bg-blue-700 text-white h-12 px-6 rounded-full"
               aria-label="Send message"
             >
               <Send className="h-5 w-5" />
@@ -112,10 +113,11 @@ export function Composer({ onSend, onMicStart, onMicStop, isListening, isDisable
             <Button
               onClick={handleMicClick}
               disabled={isDisabled}
-              className="tap-target bg-blue-600 hover:bg-blue-700 text-white"
-              aria-label={t("mic.start")}
+              className="tap-target bg-blue-600 hover:bg-blue-700 text-white h-12 px-6 rounded-full transition-all"
+              aria-label="Start listening"
             >
-              <Mic className="h-5 w-5" />
+              <Mic className="h-5 w-5 mr-2" />
+              <span className="font-medium">Start</span>
             </Button>
           )}
         </div>
