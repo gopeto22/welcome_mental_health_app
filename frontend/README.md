@@ -111,3 +111,4 @@ npm run build
 - Audio files never leave the device
 - Only text transcripts sent to backend for processing (Phase A)
 - Phase B will move all processing on-device
+# Voice updated to Wavenet-C on Sun Nov 23 13:50:21 GMT 2025
