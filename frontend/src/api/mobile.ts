@@ -175,11 +175,11 @@ export async function checkServiceHealth(): Promise<{
 function getDefaultVoice(locale: Locale): { voice: string; speed: number; pitch: number } {
   switch (locale) {
     case "en-GB":
-      // Use Neural2-F (female, natural, empathetic) with speed 1.0 and pitch -2.0
+      // Use Wavenet-C (female, warm and clear - Premium quality, natural British accent)
       return {
-        voice: "en-GB-Neural2-F",
-        speed: 1.0,
-        pitch: -2.0
+        voice: "en-GB-Wavenet-C",
+        speed: 0.95,
+        pitch: 0.0
       };
     case "ta-IN":
       return {
@@ -189,9 +189,9 @@ function getDefaultVoice(locale: Locale): { voice: string; speed: number; pitch:
       };
     default:
       return {
-        voice: "en-GB-Neural2-F",
-        speed: 1.0,
-        pitch: -2.0
+        voice: "en-GB-Wavenet-C",
+        speed: 0.95,
+        pitch: 0.0
       };
   }
 }
